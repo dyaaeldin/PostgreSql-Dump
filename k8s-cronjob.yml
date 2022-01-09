@@ -1,0 +1,46 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: postgresql-backup-cron-job
+spec:
+  schedule: "0 8,20 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: postgresql-backup-job-pod
+            image: $image
+            env:
+              - name: POSTGRESQL_PASSWORD
+                value: 
+              - name: POSTGRESQL_SERVICE_NAME
+                value: 
+              - name: POSTGRESQL_SERVICE_PORT
+                value: 
+              - name: POSTGRESQL_USERNAME
+                value:
+              - name: POSTGRESQL_DB_NAME
+                value: 
+              - name: POSTGRESQL_BACKUP_DIR
+                value: 
+              - name: POSTGRESQL_CRON_PATTERN
+                value: 
+              - name: BACKUP_TIME
+                value:
+              - name: REMOTE_BACKUP 
+                value:           
+              - name: REMOTE_HOST
+                value:
+              - name: REMOTE_DIR
+                value:
+              - name: REMOTE_SERVER_PORT
+                value:
+              - name: REMOTE_USER
+                value: 
+            imagePullPolicy: Always
+            args:
+            - /bin/sh
+            - /usr/local/bin/postgresql.sh
+          restartPolicy: OnFailure
+      backoffLimit: 3
