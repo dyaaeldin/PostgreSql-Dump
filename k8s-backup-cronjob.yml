@@ -1,0 +1,58 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: postgresql-backup-cron-job
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: postgresql-backup-job-pod
+            image: docker.io/bitnami/postgresql:11.14.0-debian-10-r17
+            env:
+              - name: POSTGRESQL_PASSWORD
+                value: pgpass
+              - name: POSTGRESQL_SERVICE_NAME
+                value: replica-post-postgresql
+              - name: POSTGRESQL_SERVICE_PORT
+                value: "5432"
+              - name: POSTGRESQL_USERNAME
+                value: postuser
+              - name: POSTGRESQL_DB_NAME
+                value: pgdb
+              - name: POSTGRESQL_BACKUP_DIR
+                value: postgresql
+              - name: POSTGRESQL_CRON_PATTERN
+                value: '* 2 * * *'
+              - name: BACKUP_TIME
+                value: "7" 
+              - name: REMOTE_BACKUP 
+                value: "false"    
+              - name: REMOTE_HOST
+                value:
+              - name: REMOTE_DIR
+                value:
+              - name: REMOTE_SERVER_PORT
+                value:
+              - name: REMOTE_USER
+                value: 
+            imagePullPolicy: Always
+            args:
+            - /bin/sh
+            - /usr/local/bin/postgresql.sh
+            volumeMounts:
+            - name: script
+              mountPath: /usr/local/bin/
+            - name: backup
+              mountPath: /mnt    
+          volumes:
+            - name: script
+              configMap:
+                name: backup-script 
+            - name: backup
+              persistentVolumeClaim:
+                claimName: backup    
+          restartPolicy: OnFailure
+      backoffLimit: 3
