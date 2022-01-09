@@ -15,9 +15,11 @@
 1. Apply configmap (contain backup-script)
 
 `kubectl create -f k8s-cronjob.yml`
+
 2. Apply pvc - pv
 
 `kubectl create -f k8s-pvc-pv.yaml`
+
 3. Apply kubernetes cronjob
 
 `kubectl create -f k8s-backup-cronjob.yml`
