@@ -1,5 +1,4 @@
 FROM alpine:3.12
-ENV TZ=Africa/Cairo
 WORKDIR /work
 COPY entrypoint.sh ./
 COPY ./scripts/ /usr/local/bin/
