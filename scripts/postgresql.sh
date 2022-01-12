@@ -1,29 +1,40 @@
 #!/usr/bin/env sh
 
+# Define the date
+DATE=$(date +%Y%m%d-%H-%M)
 # Create backup directories if not exists
-for dir in mnt tmp; do 
-  if [ ! -d "/$dir/$POSTGRESQL_BACKUP_DIR" ]; then
-     mkdir /$dir/$POSTGRESQL_BACKUP_DIR 
-  fi
-done
+[ -d /tmp/$POSTGRESQL_BACKUP_DIR ] || mkdir /tmp/$POSTGRESQL_BACKUP_DIR
+cd /tmp/"$POSTGRESQL_BACKUP_DIR"
 
 # Performing backup
-PGPASSWORD="$POSTGRESQL_PASSWORD" pg_dump -h $POSTGRESQL_SERVICE_NAME \
-        -p $POSTGRESQL_SERVICE_PORT -U $POSTGRESQL_USERNAME $POSTGRESQL_DB_NAME --clean \
-        > /tmp/"$POSTGRESQL_BACKUP_DIR"/postgresql-$(date +%Y%m%d).sql
+if [ "$BACKUP_ALL" = "true" ]; then
+    PGPASSWORD="$POSTGRESQL_PASSWORD" pg_dumpall -h $POSTGRESQL_SERVICE_NAME \
+    -p $POSTGRESQL_SERVICE_PORT -U $POSTGRESQL_USERNAME $POSTGRESQL_DB_NAME \
+    > /tmp/"$POSTGRESQL_BACKUP_DIR"/postgresql-all-$DATE.sql
+    tar cvf postgresql-all-$DATE.tar postgresql-all-$DATE.sql
+else
+    PGPASSWORD="$POSTGRESQL_PASSWORD" pg_dump -h $POSTGRESQL_SERVICE_NAME \
+    -p $POSTGRESQL_SERVICE_PORT -U $POSTGRESQL_USERNAME $POSTGRESQL_DB_NAME \
+    > /tmp/"$POSTGRESQL_BACKUP_DIR"/postgresql-$DATE.sql
+    tar cvf postgresql-$DATE.tar postgresql-$DATE.sql
+fi
 
 # Archicing the backup directory and copying the backup to persistent volume
-cd /tmp && tar cvf postgresql-$(date +%Y%m%d-%H-%M).tar "$POSTGRESQL_BACKUP_DIR"
-cp postgresql-*.tar /mnt/$POSTGRESQL_BACKUP_DIR/
+
+cp postgresql-*.tar $VOLUME_DIR
 
 # Send the backup to external backup server if needed 
-if [ "$REMOTE_BACKUP" = "true" ]; then
-        scp -o StrictHostKeyChecking=no -P $REMOTE_SERVER_PORT -i $KEY_PATH /tmp/postgresql-*.tar \
-        $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR
+if [ "$REMOTE_BACKUP" = "ssh" ]; then
+    scp -o StrictHostKeyChecking=no -P $REMOTE_SERVER_PORT -i $KEY_PATH postgresql-*.tar \
+    $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR
+elif [ "$REMOTE_BACKUP" = "s3" ]; then
+    aws s3 cp postgresql-*.tar s3://$BUCKET_NAME/
+else 
+    echo "remote backup not specified"    
 fi
 
 # Delete the temp directory
-rm -rf postgresql-*.tar /tmp/"$POSTGRESQL_BACKUP_DIR"/
+rm -rf /tmp/"$POSTGRESQL_BACKUP_DIR"/
 
 # Cleanup the old backup
-find /mnt -mindepth 1 -mtime +$BACKUP_TIME -delete
+find $VOLUME_DIR -mindepth 1 -mtime +$BACKUP_TIME -delete
