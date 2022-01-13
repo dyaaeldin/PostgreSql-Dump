@@ -3,13 +3,19 @@
 # Define the date
 DATE=$(date +%Y%m%d-%H-%M)
 # Create backup directories if not exists
+/usr/local/bin # cat postgresql.sh 
+#!/usr/bin/env sh
+
+# Define the date
+DATE=$(date +%Y%m%d-%H-%M)
+# Create backup directories if not exists
 [ -d /tmp/$POSTGRESQL_BACKUP_DIR ] || mkdir /tmp/$POSTGRESQL_BACKUP_DIR
 cd /tmp/"$POSTGRESQL_BACKUP_DIR"
 
 # Performing backup
 if [ "$BACKUP_ALL" = "true" ]; then
     PGPASSWORD="$POSTGRESQL_PASSWORD" pg_dumpall -h $POSTGRESQL_SERVICE_NAME \
-    -p $POSTGRESQL_SERVICE_PORT -U $POSTGRESQL_USERNAME $POSTGRESQL_DB_NAME \
+    -p $POSTGRESQL_SERVICE_PORT -U $POSTGRESQL_USERNAME \
     > /tmp/"$POSTGRESQL_BACKUP_DIR"/postgresql-all-$DATE.sql
     tar cvf postgresql-all-$DATE.tar postgresql-all-$DATE.sql
 else
