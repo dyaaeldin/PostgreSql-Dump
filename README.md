@@ -2,7 +2,7 @@
 * Dump postgresql database according periodically.
 * Optionally you can send backups to remote server (ssh server or upload to s3)
 * You can specify max no of backups on the local volume (for example you can keep only last 7 days on local volume)
-* 
+
 ## Usage
 ### Docker-compose 
 1. Update the docker-compose.yaml env variables to be suitable for usage
