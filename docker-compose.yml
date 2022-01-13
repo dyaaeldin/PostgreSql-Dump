@@ -5,6 +5,7 @@ services:
     volume:
       - ./backup:/mnt
     environment:
+      # for backup all databases set this env by true, else it will backup only one database.
       - BACKUP_ALL=true
       - VOLUME_DIR=/mnt
       - POSTGRESQL_PASSWORD=password123
@@ -15,7 +16,14 @@ services:
       - POSTGRESQL_BACKUP_DIR=post
       - POSTGRESQL_CRON_PATTERN=* 2 * * *
       - BACKUP_TIME=7
-      - REMOTE_BACKUP=none
+      # Choose either s3 or ssh and then configure the required envs
+      - REMOTE_BACKUP=s3
+      # AWS s3 env variables
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - AWS_DEFAULT_REGION=
+      - BUCKET_NAME=
+      # SSH env variables
       - REMOTE_HOST=10.107.148.24
       - REMOTE_DIR=/home/ddd
       - REMOTE_SERVER_PORT=22
