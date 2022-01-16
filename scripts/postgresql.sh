@@ -3,12 +3,6 @@
 # Define the date
 DATE=$(date +%Y%m%d-%H-%M)
 # Create backup directories if not exists
-/usr/local/bin # cat postgresql.sh 
-#!/usr/bin/env sh
-
-# Define the date
-DATE=$(date +%Y%m%d-%H-%M)
-# Create backup directories if not exists
 [ -d /tmp/$POSTGRESQL_BACKUP_DIR ] || mkdir /tmp/$POSTGRESQL_BACKUP_DIR
 cd /tmp/"$POSTGRESQL_BACKUP_DIR"
 
